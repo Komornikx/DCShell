@@ -31,7 +31,7 @@ class client extends Client {
 	}
 
 	async closeAllShells() {
-		//* Pętla all gildie - pobieraj konfig danej gildii i usuwaj kanaly z shellami na podstawie konfigu
+		//* All guild loop - fetch guild config and remove i usuwaj channels with shells
 
 		const guilds = (await this.guilds.fetch()).map((el) => el.id);
 		for (const guildId of guilds) {
@@ -46,8 +46,6 @@ class client extends Client {
 				.map((el) => el)
 				.filter((el) => el.parentId == category.id);
 
-			console.log(shellChannels);
-
 			for (const channel of shellChannels) {
 				channel.delete();
 			}
@@ -60,7 +58,7 @@ class client extends Client {
 	 * @param {String} guildId
 	 * @param {String} clientId
 	 */
-	#registerCommands(token, guildId, clientId) {
+	async #registerCommands(token, guildId, clientId) {
 		const rest = new REST({ version: '9' }).setToken(token);
 		(async () => {
 			try {

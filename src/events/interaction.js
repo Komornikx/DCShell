@@ -1,9 +1,11 @@
 const Shell = require('../Shell');
+const { spawn } = require('child_process');
 
 module.exports = {
 	name: 'interactionCreate',
 	async execute(interaction) {
 		if (interaction.commandName) {
+			console.log(interaction.commandName);
 			const user = interaction.member;
 			const guild = interaction.guild;
 
@@ -54,9 +56,47 @@ module.exports = {
 						);
 						newChannel.setParent(category.id);
 
-						interaction.client.shells.push(new Shell(user.id));
 						interaction.editReply('Created!');
 						newChannel.send(`@${user.id} Here!`);
+						await newChannel.send(`~/`);
+
+						interaction.client.shells.push(
+							new Shell(user.id, guild.id, newChannel.id)
+						);
+						interaction.client.on('messageCreate', async (msg) => {
+							if (msg.author.bot) {
+								return;
+							}
+
+							const shellProcess = spawn(msg.content, {
+								shell: 'powershell.exe',
+							});
+
+							console.log(msg.content);
+
+							const output = await new Promise((resolve) => {
+								const outputArr = [];
+
+								shellProcess.stdout.on('data', async (data) => {
+									const output = await data.toString().trim();
+									outputArr.push(output);
+								});
+
+								shellProcess.on('exit', () => {
+									resolve(outputArr.join(''));
+								});
+							});
+
+							if (!output) {
+								return;
+							}
+
+							newChannel.send(output);
+
+							shellProcess.stderr.on('data', (data) => {
+								console.error(`stderr: ${data}`);
+							});
+						});
 					} catch (err) {
 						console.log(err);
 						interaction.editReply('Error while creating a new shell');

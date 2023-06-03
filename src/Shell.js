@@ -3,8 +3,6 @@ class Shell {
 		this.uId = uId;
 		this.guildId = guildId;
 		this.channelId = channelId;
-
-		this.text = '';
 	}
 }
 
