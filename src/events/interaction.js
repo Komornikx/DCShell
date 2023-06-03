@@ -1,5 +1,6 @@
 const Shell = require('../Shell');
 const { spawn } = require('child_process');
+const path = require('path');
 
 module.exports = {
 	name: 'interactionCreate',
@@ -58,7 +59,7 @@ module.exports = {
 
 						interaction.editReply('Created!');
 						newChannel.send(`@${user.id} Here!`);
-						await newChannel.send(`~/`);
+						await newChannel.send(path.join(require.main.filename, '..'));
 
 						interaction.client.shells.push(
 							new Shell(user.id, guild.id, newChannel.id)
