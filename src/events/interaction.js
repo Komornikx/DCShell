@@ -73,8 +73,6 @@ module.exports = {
 								shell: 'powershell.exe',
 							});
 
-							console.log(msg.content);
-
 							const output = await new Promise((resolve) => {
 								const outputArr = [];
 
@@ -92,7 +90,7 @@ module.exports = {
 								return;
 							}
 
-							newChannel.send(output);
+							newChannel.send(`\`\`\`${output}\`\`\``);
 
 							shellProcess.stderr.on('data', (data) => {
 								console.error(`stderr: ${data}`);
