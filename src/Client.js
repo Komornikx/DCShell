@@ -7,8 +7,6 @@ const { Routes } = require('discord-api-types/v9');
 
 const commands = require('./commands');
 
-const Config = require('./db/Models/Config');
-
 class client extends Client {
 	constructor(options) {
 		super(options);
@@ -81,7 +79,7 @@ class client extends Client {
 			const shellId = msg.channelId;
 			for (const shell of this.shells) {
 				if (shell.channel.id == shellId) {
-					const shellProcess = spawn(msg.content, {
+					const shellProcess = spawn(`${msg.content}`, {
 						shell: 'powershell.exe',
 					});
 
@@ -89,6 +87,11 @@ class client extends Client {
 						const outputArr = [];
 
 						shellProcess.stdout.on('data', async (data) => {
+							const output = await data.toString().trim();
+							outputArr.push(output);
+						});
+
+						shellProcess.stderr.on('data', async (data) => {
 							const output = await data.toString().trim();
 							outputArr.push(output);
 						});
@@ -101,12 +104,7 @@ class client extends Client {
 					if (!output) {
 						return;
 					}
-
 					shell.channel.send(`\`\`\`${output}\`\`\``);
-
-					shellProcess.stderr.on('data', (data) => {
-						console.error(`stderr: ${data}`);
-					});
 				}
 			}
 		});

@@ -6,7 +6,7 @@ module.exports = {
 	async execute(interaction) {
 		if (interaction.commandName) {
 			console.log(interaction.commandName);
-			const user = interaction.member;
+			const member = interaction.member;
 			const guild = interaction.guild;
 
 			switch (interaction.commandName) {
@@ -38,30 +38,36 @@ module.exports = {
 							});
 						}
 
+						console.log(member.user);
 						const newChannel = await guild.channels.create(
-							`${user.username}-SHELL`,
+							`${member.user.username}-SHELL`,
 							{
 								type: 'GUILD_TEXT',
+								parent: category.id,
 								permissionOverwrites: [
 									{
 										id: guild.roles.everyone,
 										deny: ['VIEW_CHANNEL', 'SEND_MESSAGES'],
 									},
 									{
-										id: user.id,
+										id: member.id,
 										allow: ['VIEW_CHANNEL', 'SEND_MESSAGES', 'CONNECT'],
 									},
 								],
 							}
 						);
-						newChannel.setParent(category.id);
 
 						interaction.editReply('Created!');
-						newChannel.send(`@${user.id} Here!`);
+						newChannel.send(`<@${member.user.id}> Here!`);
 						await newChannel.send(path.join(require.main.filename, '..'));
 
 						interaction.client.shells.push(
-							new Shell(user.id, guild.id, newChannel)
+							new Shell(
+								member.id,
+								guild.id,
+								newChannel,
+								path.join(require.main.filename, '..')
+							)
 						);
 					} catch (err) {
 						console.log(err);
