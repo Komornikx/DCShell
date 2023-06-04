@@ -80,6 +80,7 @@ class client extends Client {
 			for (const shell of this.shells) {
 				if (shell.channel.id == shellId) {
 					const shellProcess = spawn(`${msg.content}`, {
+						cwd: shell.directory,
 						shell: 'powershell.exe',
 					});
 
