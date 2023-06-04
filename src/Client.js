@@ -1,5 +1,6 @@
 const fs = require('fs');
 const path = require('path');
+const { spawn } = require('child_process');
 const { Client } = require('discord.js');
 const { REST } = require('@discordjs/rest');
 const { Routes } = require('discord-api-types/v9');
@@ -70,6 +71,45 @@ class client extends Client {
 				console.error(err);
 			}
 		})();
+
+		this.on('messageCreate', async (msg) => {
+			if (msg.author.bot) {
+				return;
+			}
+			// console.log(msg);
+
+			const shellId = msg.channelId;
+			for (const shell of this.shells) {
+				if (shell.channel.id == shellId) {
+					const shellProcess = spawn(msg.content, {
+						shell: 'powershell.exe',
+					});
+
+					const output = await new Promise((resolve) => {
+						const outputArr = [];
+
+						shellProcess.stdout.on('data', async (data) => {
+							const output = await data.toString().trim();
+							outputArr.push(output);
+						});
+
+						shellProcess.on('exit', () => {
+							resolve(outputArr.join(''));
+						});
+					});
+
+					if (!output) {
+						return;
+					}
+
+					shell.channel.send(`\`\`\`${output}\`\`\``);
+
+					shellProcess.stderr.on('data', (data) => {
+						console.error(`stderr: ${data}`);
+					});
+				}
+			}
+		});
 	}
 
 	/**

@@ -1,8 +1,8 @@
 class Shell {
-	constructor(uId, guildId, channelId) {
+	constructor(uId, guildId, channel) {
 		this.uId = uId;
 		this.guildId = guildId;
-		this.channelId = channelId;
+		this.channel = channel;
 	}
 }
 

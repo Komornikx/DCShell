@@ -1,5 +1,4 @@
 const Shell = require('../Shell');
-const { spawn } = require('child_process');
 const path = require('path');
 
 module.exports = {
@@ -62,40 +61,8 @@ module.exports = {
 						await newChannel.send(path.join(require.main.filename, '..'));
 
 						interaction.client.shells.push(
-							new Shell(user.id, guild.id, newChannel.id)
+							new Shell(user.id, guild.id, newChannel)
 						);
-						interaction.client.on('messageCreate', async (msg) => {
-							if (msg.author.bot) {
-								return;
-							}
-
-							const shellProcess = spawn(msg.content, {
-								shell: 'powershell.exe',
-							});
-
-							const output = await new Promise((resolve) => {
-								const outputArr = [];
-
-								shellProcess.stdout.on('data', async (data) => {
-									const output = await data.toString().trim();
-									outputArr.push(output);
-								});
-
-								shellProcess.on('exit', () => {
-									resolve(outputArr.join(''));
-								});
-							});
-
-							if (!output) {
-								return;
-							}
-
-							newChannel.send(`\`\`\`${output}\`\`\``);
-
-							shellProcess.stderr.on('data', (data) => {
-								console.error(`stderr: ${data}`);
-							});
-						});
 					} catch (err) {
 						console.log(err);
 						interaction.editReply('Error while creating a new shell');
