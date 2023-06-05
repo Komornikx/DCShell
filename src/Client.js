@@ -74,7 +74,6 @@ class client extends Client {
 			if (msg.author.bot) {
 				return;
 			}
-			// console.log(msg);
 
 			const shellId = msg.channelId;
 			for (const shell of this.shells) {
@@ -84,7 +83,19 @@ class client extends Client {
 						shell: 'powershell.exe',
 					});
 
-					const output = await new Promise((resolve) => {
+					//! Change directory - fixes todo
+					const lastDir = shell.directory;
+
+					if (msg.content == 'cd..' || msg.content == 'cd ..') {
+						shell.directory = path.join(shell.directory, '..');
+					} else if (/^(cd) {0,1}.*/g.test(msg.content)) {
+						shell.directory = path.join(
+							shell.directory,
+							msg.content.replace(/^(cd) ?/, '')
+						);
+					}
+
+					let output = await new Promise((resolve) => {
 						const outputArr = [];
 
 						shellProcess.stdout.on('data', async (data) => {
@@ -95,6 +106,9 @@ class client extends Client {
 						shellProcess.stderr.on('data', async (data) => {
 							const output = await data.toString().trim();
 							outputArr.push(output);
+
+							//!if it's a change dir command and it doesn't exists return to previous dir
+							shell.directory = lastDir;
 						});
 
 						shellProcess.on('exit', () => {
@@ -102,10 +116,16 @@ class client extends Client {
 						});
 					});
 
-					if (!output) {
-						return;
+					if (output) {
+						while (output.length > 0) {
+							const send = output.slice(0, 1950);
+							output = output.substring(1950);
+
+							shell.channel.send(`\`\`\`${send}\`\`\``);
+						}
 					}
-					shell.channel.send(`\`\`\`${output}\`\`\``);
+
+					shell.channel.send(`\`\`\`${shell.directory}\\\`\`\``);
 				}
 			}
 		});

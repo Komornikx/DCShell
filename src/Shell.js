@@ -5,6 +5,7 @@ class Shell {
 		this.channel = channel;
 
 		this.directory = directory;
+		this.output = [];
 	}
 }
 
