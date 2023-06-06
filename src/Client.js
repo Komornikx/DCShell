@@ -107,12 +107,12 @@ class client extends Client {
 							const output = await data.toString().trim();
 							outputArr.push(output);
 
-							//!if it's a change dir command and it doesn't exists return to previous dir
+							//!if it's a change dir command and dir doesn't exists return to previous dir
 							shell.directory = lastDir;
 						});
 
 						shellProcess.on('exit', () => {
-							resolve(outputArr.join(''));
+							resolve(outputArr.join('\n'));
 						});
 					});
 

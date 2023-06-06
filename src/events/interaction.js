@@ -56,18 +56,15 @@ module.exports = {
 								],
 							}
 						);
+						const startDir =
+							process.env.START_DIR || path.join(require.main.filename, '..');
 
 						interaction.editReply('Created!');
 						newChannel.send(`<@${member.user.id}> Here!`);
-						await newChannel.send(path.join(require.main.filename, '..'));
+						newChannel.send(`\`\`\`${startDir}\`\`\``);
 
 						interaction.client.shells.push(
-							new Shell(
-								member.id,
-								guild.id,
-								newChannel,
-								path.join(require.main.filename, '..')
-							)
+							new Shell(member.id, guild.id, newChannel, startDir)
 						);
 					} catch (err) {
 						console.log(err);
