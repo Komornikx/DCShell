@@ -64,7 +64,7 @@ class client extends Client {
 				await rest.put(Routes.applicationGuildCommands(clientId, guildId), {
 					body: commands,
 				});
-				console.log('commands registered successfully!');
+				console.log('Commands registered successfully!');
 			} catch (err) {
 				console.error(err);
 			}
@@ -125,8 +125,6 @@ class client extends Client {
 							}, 8000);
 						}),
 					]);
-
-					console.log(output);
 
 					if (output.finished) {
 						while (output.txt.length > 0 && output.txt) {
