@@ -132,8 +132,8 @@ class client extends Client {
 							output.txt = output.txt.substring(1950);
 
 							shell.channel.send(`\`\`\`${send}\`\`\``);
-							shell.channel.send(`\`\`\`${shell.directory}\\\`\`\``);
 						}
+						shell.channel.send(`\`\`\`${shell.directory}\\\`\`\``);
 					} else if (!output.finished) {
 						const interval = setInterval(() => {
 							output.txt = outputArr.join('\n');
