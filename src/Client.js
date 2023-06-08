@@ -95,37 +95,61 @@ class client extends Client {
 						);
 					}
 
-					let output = await new Promise((resolve) => {
-						const outputArr = [];
+					let outputArr = [];
 
-						shellProcess.stdout.on('data', async (data) => {
-							const output = await data.toString().trim();
-							outputArr.push(output);
-						});
-
-						shellProcess.stderr.on('data', async (data) => {
-							const output = await data.toString().trim();
-							outputArr.push(output);
-
-							//!if it's a change dir command and dir doesn't exists return to previous dir
-							shell.directory = lastDir;
-						});
-
-						shellProcess.on('exit', () => {
-							resolve(outputArr.join('\n'));
-						});
+					shellProcess.stdout.on('data', async (data) => {
+						const outputData = await data.toString().trim();
+						outputArr.push(outputData);
 					});
 
-					if (output) {
-						while (output.length > 0) {
-							const send = output.slice(0, 1950);
-							output = output.substring(1950);
+					shellProcess.stderr.on('data', async (data) => {
+						const outputData = await data.toString().trim();
+						outputArr.push(outputData);
+
+						//!if it's a change dir command and dir doesn't exists return to previous dir
+						shell.directory = lastDir;
+					});
+
+					let output = await Promise.race([
+						new Promise((resolve) => {
+							shellProcess.on('exit', () => {
+								resolve({
+									finished: true,
+									txt: outputArr.join('\n'),
+								});
+							});
+						}),
+						new Promise((resolve) => {
+							setTimeout(() => {
+								resolve({ finished: false, txt: outputArr.join('\n') });
+							}, 8000);
+						}),
+					]);
+
+					console.log(output);
+
+					if (output.finished) {
+						while (output.txt.length > 0 && output.txt) {
+							const send = output.txt.slice(0, 1950);
+							output.txt = output.txt.substring(1950);
 
 							shell.channel.send(`\`\`\`${send}\`\`\``);
+							shell.channel.send(`\`\`\`${shell.directory}\\\`\`\``);
 						}
-					}
+					} else if (!output.finished) {
+						const interval = setInterval(() => {
+							output.txt = outputArr.join('\n');
+							outputArr = output.txt.substring(1950).split('\n');
+							const send = output.txt.slice(0, 1950);
+							output.txt = output.txt.substring(1950);
 
-					shell.channel.send(`\`\`\`${shell.directory}\\\`\`\``);
+							shell.channel.send(`\`\`\`${send}\`\`\``);
+						}, 2500);
+
+						shellProcess.on('exit', () => {
+							clearInterval(interval);
+						});
+					}
 				}
 			}
 		});
