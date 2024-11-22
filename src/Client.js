@@ -78,7 +78,7 @@ class client extends Client {
 			const shellId = msg.channelId;
 			for (const shell of this.shells) {
 				if (shell.channel.id == shellId) {
-					//todo make a one interactable shell for multiple commands instead of creating a new shell at every command to make a live processes also interactable
+					//todo create one interactable shell for multiple commands instead of creating a new shell for every command, to make a live processes also interactable
 					const shellProcess = spawn(`${msg.content}`, {
 						cwd: shell.directory,
 						shell: 'powershell.exe',
@@ -136,7 +136,7 @@ class client extends Client {
 						}
 						shell.channel.send(`\`\`\`${shell.directory}\\\`\`\``);
 					} else if (!output.finished) {
-						//todo Create event listener using event emitter for shellProcess.stdout to send live output data
+						//todo create event listener using event emitter for shellProcess.stdout to send live output data
 						const interval = setInterval(() => {
 							if (outputArr.length <= 0) {
 								return;
